@@ -474,6 +474,215 @@ Initialiser les données : Avant de pouvoir accéder à l'interface d'administra
 
 ------->installation de  package DoctrineFixturesBundle
 La commande composer require --dev orm-fixtures permet d'installer le package DoctrineFixturesBundle dans un projet Symfony. Ce bundle est utilisé pour peupler la base de données avec des données fictives (ou "fixtures") dans un environnement de développement. Voici une explication détaillée :
+--------> on modifie le fichier AppFixtures.php on va dire que user c'est lui l'admin:
+<?php
+
+namespace App\DataFixtures;
+
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Persistence\ObjectManager;
+
+class AppFixtures extends Fixture
+{
+    public function load(ObjectManager $manager): void
+    {
+         $user = new User();         <------on a rajouté user
+         $manager->persist($user);   <------on a rajouté user
+
+        $manager->flush();
+    }
+}
+============================================================================================
+CREATION DE USER 
+<?php
+
+namespace App\DataFixtures;
+
+use App\Entity\User;
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Persistence\ObjectManager;
+
+class AppFixtures extends Fixture
+{
+    private $PasswordHasher;
+    public function __construct(UserPasswordHasherInterface $PasswordHasher){
+        $this->$PasswordHasher =$PasswordHasher;
+    }
+
+    public function load(ObjectManager $manager): void
+    {
+         $user = new User();
+         $plainPassword = "Azerty1234";
+         $hashedPassword = $this->PasswordHasher->hashPassword($user, $plainPassword);
+         $user->setUsername('admin');
+         $usersetPassword($hashedPassword);
+         $user->setRoles(['ROLE_ADMIN']);
+         $manager->persist($user);
+
+        $manager->flush();
+    }
+}
+===========================================================================================
+explication du code
+1. Namespace et utilisation des classes nécessaires
+php
+Copier le code
+namespace App\DataFixtures;
+
+use App\Entity\User;
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Persistence\ObjectManager;
+Namespace : Le fichier AppFixtures appartient au namespace App\DataFixtures, qui est le dossier où les fixtures sont organisées dans votre projet Symfony.
+Imports :
+App\Entity\User : Utilisé pour manipuler l'entité User dans la base de données.
+Doctrine\Bundle\FixturesBundle\Fixture : Fournit la classe de base pour créer des fixtures.
+Doctrine\Persistence\ObjectManager : Interface pour gérer les entités (insertion, mise à jour, suppression dans la base de données).
+2. Déclaration de la classe AppFixtures
+php
+Copier le code
+class AppFixtures extends Fixture
+La classe AppFixtures hérite de la classe Fixture, qui permet de créer des fixtures avec des méthodes spécifiques, comme load().
+
+3. Ajout du hashage de mot de passe
+php
+Copier le code
+private $PasswordHasher;
+
+public function __construct(UserPasswordHasherInterface $PasswordHasher){
+    $this->$PasswordHasher = $PasswordHasher;
+}
+Propriété $PasswordHasher : Elle stocke un service de hashage de mot de passe, ici injecté via le constructeur.
+Injection de dépendance :
+UserPasswordHasherInterface est un service fourni par Symfony pour sécuriser les mots de passe en les hachant.
+Grâce à l'injection de dépendance, Symfony injecte automatiquement l'instance de ce service lors de la création de l'objet AppFixtures.
+Remarque : Une erreur se trouve ici. La ligne $this->$PasswordHasher = $PasswordHasher; contient une faute. Le signe $ ne devrait pas être utilisé pour accéder à la propriété, cela devrait être :
+
+php
+Copier le code
+$this->PasswordHasher = $PasswordHasher;
+4. Méthode load()
+php
+Copier le code
+public function load(ObjectManager $manager): void
+ObjectManager : Permet de gérer les opérations sur la base de données comme la persistance et le flush.
+Objectif : Créer un utilisateur admin, hacher son mot de passe, définir ses rôles, et l'enregistrer dans la base de données.
+5. Création d'un utilisateur User
+php
+Copier le code
+$user = new User();
+$plainPassword = "Azerty1234";
+$hashedPassword = $this->PasswordHasher->hashPassword($user, $plainPassword);
+$user->setUsername('admin');
+$user->setPassword($hashedPassword);
+$user->setRoles(['ROLE_ADMIN']);
+$manager->persist($user);
+Création d'un nouvel utilisateur :
+
+php
+Copier le code
+$user = new User();
+Une nouvelle instance de l'entité User est créée.
+
+Définir un mot de passe brut :
+
+php
+Copier le code
+$plainPassword = "Azerty1234";
+Ce mot de passe sera haché pour garantir la sécurité.
+
+Hashage du mot de passe :
+
+php
+Copier le code
+$hashedPassword = $this->PasswordHasher->hashPassword($user, $plainPassword);
+Le mot de passe brut est passé à la méthode hashPassword() du service UserPasswordHasherInterface.
+Résultat : un mot de passe sécurisé qui sera stocké en base de données.
+Définir les propriétés de l'utilisateur :
+
+Nom d'utilisateur :
+php
+Copier le code
+$user->setUsername('admin');
+Mot de passe haché :
+php
+Copier le code
+$user->setPassword($hashedPassword);
+Rôle administrateur :
+php
+Copier le code
+$user->setRoles(['ROLE_ADMIN']);
+Persistance de l'utilisateur :
+
+php
+Copier le code
+$manager->persist($user);
+L'utilisateur est marqué comme prêt à être ajouté à la base de données.
+
+6. Validation en base de données
+php
+Copier le code
+$manager->flush();
+La méthode flush() enregistre toutes les entités marquées comme persistées dans la base de données. Dans ce cas, l'utilisateur admin est enregistré.
+
+Erreurs potentielles dans le code
+Problème d'accès à la propriété $PasswordHasher :
+
+php
+Copier le code
+$this->$PasswordHasher = $PasswordHasher;
+Cela devrait être corrigé en :
+
+php
+Copier le code
+$this->PasswordHasher = $PasswordHasher;
+Erreur dans le nom de la méthode :
+
+php
+Copier le code
+$usersetPassword($hashedPassword);
+Une faute de frappe est présente. Cela devrait être :
+
+php
+Copier le code
+$user->setPassword($hashedPassword);
+Finalité
+===========================================================================
+Télécharger les fictures en utilisant la commande suivante: 
+php bin/console doctrine:fixtures:load
+EXPLICATION 
+1. Commande : php bin/console doctrine:fixtures:load
+Cette commande charge les fixtures (données fictives ou de test) définies dans les classes du namespace App\DataFixtures. Cela permet d'insérer des données dans la base de données pour tester ou initialiser l'application.
+
+2. Message :
+plaintext
+Copier le code
+Careful, database "sym_appecommerce" will be purged. Do you want to continue? (yes/no) [no]:
+Signification : Symfony avertit que la base de données nommée sym_appecommerce va être purgée, c'est-à-dire que toutes les données existantes seront supprimées.
+Vous avez deux options :
+yes : Confirmez pour continuer avec la suppression des données existantes et l'insertion des fixtures.
+no (par défaut) : Annulez l'opération pour ne pas perdre les données.
+3. Input : yes
+Vous avez confirmé que vous souhaitez continuer malgré l'avertissement.
+
+4. Étapes exécutées après confirmation
+4.1 Purging database
+Action : Doctrine utilise le service ORM Purger pour nettoyer la base de données en supprimant toutes les données des tables. Cela remet la base de données à un état vierge.
+Cela inclut :
+Suppression des relations entre les tables.
+Réinitialisation des auto-incréments pour les clés primaires (selon le système de base de données).
+4.2 Loading App\DataFixtures\AppFixtures
+Action : Doctrine charge et exécute les méthodes load des classes de fixtures, comme AppFixtures dans votre cas.
+Dans votre fichier AppFixtures.php :
+Un utilisateur admin avec le rôle ROLE_ADMIN est créé.
+Son mot de passe est haché avec UserPasswordHasherInterface.
+L'utilisateur est persisté dans la base de données grâce au gestionnaire d'entités ($manager->persist).
+Toutes les données sont écrites en base avec $manager->fl
+==========================================================================
+MODIFIER LA PAGE D'ACCUEIL PRINCIPALE base.html.twig (toutes les autres pages hérite de cette page)
+
+
+
+
 
 
 
