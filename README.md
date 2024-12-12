@@ -678,7 +678,56 @@ Son mot de passe est haché avec UserPasswordHasherInterface.
 L'utilisateur est persisté dans la base de données grâce au gestionnaire d'entités ($manager->persist).
 Toutes les données sont écrites en base avec $manager->fl
 ==========================================================================
-MODIFIER LA PAGE D'ACCUEIL PRINCIPALE base.html.twig (toutes les autres pages hérite de cette page)
+MODIFIER LA PAGE D'ACCUEIL PRINCIPALE base.html.twig (toutes les autres pages hérite de cette page) en inserant le CID css et javascript
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
+        {% block stylesheets %}
+           <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        {% endblock %}
+
+        {% block javascripts %}
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+            {{ importmap() }}
+        {% endblock %}
+    </head>
+    <body>
+        {% block body %}{% endblock %}
+    </body>
+</html>
+
+PLICATION DU CODE:
+
+EXAnalyse et vérifications
+Structure globale :
+
+La structure HTML est correcte avec les blocs Twig ({% block ... %}) pour permettre l'extension et la personnalisation dans les fichiers enfants.
+Titre de la page :
+
+Le bloc {% block title %} est bien utilisé pour permettre aux fichiers enfants de définir leurs propres titres.
+Favicon :
+
+Le lien vers la favicon est valide, mais il peut être plus utile de fournir une URL spécifique ou un fichier local pour une favicon personnalisée.
+Stylesheets et Bootstrap :
+
+Le lien CDN pour Bootstrap CSS est correct.
+Il utilise une version stable (5.0.2), et le integrity ainsi que le crossorigin sont bien configurés.
+JavaScript et Bootstrap :
+
+Le script CDN pour Bootstrap JS est également correct et inclut le fichier bundle (avec Popper.js intégré).
+Fonction {{ importmap() }} :
+
+Cette fonction semble provenir d'une configuration particulière (comme Symfony UX ImportMap). Assurez-vous qu'importmap() est bien configuré dans votre projet, sinon cela peut générer une erreur.
+Bloc {% block body %} :
+
+Ce bloc est présent et vide, ce qui est attendu dans une structure de base.
+
+------>création de HommeController
+
 
 
 
