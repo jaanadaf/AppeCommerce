@@ -742,7 +742,28 @@ et ça
     </ul>
     ====================================================================
     ---->Création de ProductController
-    
+    dans ce fichier on va coller cette fonction et faire quelque modification:
+
+     #[Route('/product', name: 'app_product')]
+    public function index(): Response
+    {
+        return $this->render('product/index.html.twig', [
+            'controller_name' => 'ProductController',
+        ]);
+    }
+    aprés:
+    #[Route('/store/product', name: 'product_store')]
+    public function store(Request $request): Response
+    {
+        return $this->render('product/index.html.twig', [
+            'controller_name' => 'ProductController',
+        ]);
+    }
+    =================================================================
+    -------->création formulaire avant il faut installer le apquage avec la commande suivante: composer require symfony/form
+    aprés utiliser la commande suivante: php bin/console make:form
+
+
 
 
 
