@@ -760,8 +760,12 @@ et ça
         ]);
     }
     =================================================================
-    -------->création formulaire avant il faut installer le apquage avec la commande suivante: composer require symfony/form
-    aprés utiliser la commande suivante: php bin/console make:form
+    -------->création formulaire avant il faut installer le apquage avec la commande suivante: 
+    
+    composer require symfony/form
+
+    aprés utiliser la commande suivante:
+     php bin/console make:form
 
     Ce code montre l’utilisation de la commande Symfony php bin/console make:form pour générer une classe de formulaire. Voici une explication détaillée de ce qui se passe étape par étape :
 
@@ -914,7 +918,9 @@ class ProductController extends AbstractController
             'controller_name' => 'ProductController',
         ]);
     }
-    #[Route('/store/product', name: 'product_store')]
+
+------->on a duppliquer ce code puis on a rajouté les modification suivante:
+    #[Route('/store/product', name: 'product_store')]  
     public function store(Request $request): Response
     {
         $product = new Product();
