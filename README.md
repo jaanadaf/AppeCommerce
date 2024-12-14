@@ -761,7 +761,7 @@ et ça
     }
     =================================================================
     -------->création formulaire avant il faut installer le apquage avec la commande suivante: 
-    
+
     composer require symfony/form
 
     aprés utiliser la commande suivante:
@@ -1024,6 +1024,8 @@ C'est une manière courante de structurer les templates dans Symfony pour garant
 
 {% endblock %}
 =========================================================================
+-----> Ajout de boutton submit dans le fichier ProductType 
+  ->add('Submit', SubmitType::class)
 
 
 
