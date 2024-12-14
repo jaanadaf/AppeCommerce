@@ -3,6 +3,55 @@
 {% block title %}Hello ProductController!{% endblock %}
 
 {% block body %}
-{{form(form)}}
+    <div class="container mt-5">
+        <h1 class="mb-4">Creat new Product</h1>
 
+        {{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
+        
+        <div class="row mb-3">
+            <label for="{{ form.name.vars.id }}" class="col-sm-2 col-form-label"> Name</label>
+            <div class="col-sm-10">
+                {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <label for="{{ form.description.vars.id }}" class="col-sm-2 col-form-label">Description</label>
+            <div class="col-sm-10">
+                {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="{{ form.price.vars.id }}" class="col-sm-2 col-form-label">Price</label>
+            <div class="col-sm-10">
+                {{ form_widget(form.price, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="{{ form.quantity.vars.id }}" class="col-sm-2 col-form-label">Quantity</label>
+            <div class="col-sm-10">
+                {{ form_widget(form.quantity, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="{{ form.image.vars.id }}" class="col-sm-2 col-form-label">Image</label>
+            <div class="col-sm-10">
+                {{ form_widget(form.image, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="{{ form.category.vars.id }}" class="col-sm-2 col-form-label">Category</label>
+            <div class="col-sm-10">
+                {{ form_widget(form.category, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+
+        
+        
+        {{ form_end(form) }}
+    </div>
 {% endblock %}

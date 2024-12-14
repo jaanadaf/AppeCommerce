@@ -26,7 +26,7 @@ class ProductType extends AbstractType
             ->add('category', EntityType::class, [ // Champ pour choisir une catégorie
                 'class' => Category::class // Lié à l'entité Category
             ])
-            ->add('Submit', SubmitType::class)
+            ->add('Submit' , SubmitType::class)
             ;
     }
 
