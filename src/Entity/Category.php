@@ -78,3 +78,16 @@ class Category
         return $this->name;
     }
 }
+
+/*La méthode __toString() dans une classe PHP permet de définir comment un objet de cette classe doit être
+ représenté sous forme de chaîne de caractères lorsque vous tentez de l'afficher ou de l'utiliser dans une 
+ situation où une chaîne de caractères est attendue.
+Dans le cas de l'entité Category, la méthode __toString() est ajoutée pour spécifier que, lorsqu'un objet Category
+ est affiché dans un contexte où une chaîne est attendue (comme dans un formulaire Twig), il doit afficher le nom 
+ de la catégorie plutôt que l'ID ou d'autres informations.
+Pourquoi l'ajouter dans Category.php
+Lors de l'utilisation du champ EntityType dans un formulaire Symfony (comme pour le champ category dans le formulaire ProductType),
+ Symfony essaie de convertir l'entité en une chaîne de caractères pour afficher les options dans le sélecteur. Sans la méthode __toString(),
+  Symfony essaierait de l'afficher sous forme d'un identifiant ou d'un objet qui ne sera pas très lisible.
+En ajoutant cette méthode __toString() dans l'entité Category, vous spécifiez que, lorsqu'un objet Category est affiché,
+ il doit afficher la valeur du champ name, qui représente la marque de l'ordinateur ou la catégorie, plutôt que l'objet entier ou son identifiant.*/
