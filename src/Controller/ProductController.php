@@ -58,7 +58,7 @@ class ProductController extends AbstractController
             $this->entityManager->flush();
 
             $this->addFlash(
-                'succes',
+                'success',
                 'Your product was saved'
             );
 
