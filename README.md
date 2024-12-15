@@ -1862,6 +1862,99 @@ php
 Copier le code
 return $this->redirectToRoute('product_list');
 Une fois le produit supprimé, on redirige l'utilisateur vers la liste des produits en utilisant la route product_list.
+=========================================================================
+PERSONNALISATION DE L'ACTION:
+
+LE CODE DAND LE FICHIER index.html.twig
+
+    <td class="d-flex justify-content-around align-items-center">
+                                <a href="{{path('product_show', {id: product.id})}}" class="btn btn-sm btn-dark">
+                                    show
+                                </a>
+                                <a href="{{path('product_edit', {id: product.id})}}" class="btn btn-sm btn-warning">
+                                    edit
+                                </a>
+                                <a href="{{path('product_delete', {id: product.id})}}" class="btn btn-sm btn-danger">
+                                    delete
+                                </a>
+                            </td> 
+
+EXPLICATION DU CODE:
+Ce code HTML/Twig représente une cellule de tableau <td> contenant trois boutons pour différentes actions (show, edit, delete) relatives à un produit. Voici une explication détaillée ligne par ligne :
+
+Structure générale du <td>
+html
+Copier le code
+<td class="d-flex justify-content-around align-items-center">
+<td> : Déclare une cellule dans une ligne de tableau <tr>.
+class="d-flex justify-content-around align-items-center" : Utilise les classes CSS de Bootstrap pour positionner les éléments :
+d-flex : Active le mode flexbox pour aligner les éléments (boutons) dans la cellule.
+justify-content-around : Place les boutons avec un espace égal entre eux.
+align-items-center : Centre verticalement les boutons dans la cellule.
+Bouton "show"
+html
+Copier le code
+<a href="{{ path('product_show', {id: product.id}) }}" class="btn btn-sm btn-dark">
+    show
+</a>
+<a> : C'est un lien hypertexte qui agit comme un bouton.
+href="{{ path('product_show', {id: product.id}) }}" :
+La fonction path génère l'URL correspondant à la route nommée product_show.
+{id: product.id} : Transmet l'id du produit en tant que paramètre à la route. Par exemple, si le produit a l'ID 5, le lien pourrait être :
+bash
+Copier le code
+/product/details/5
+class="btn btn-sm btn-dark" : Applique les classes Bootstrap pour styliser le lien comme un bouton.
+btn : Transforme l'élément en bouton.
+btn-sm : Rend le bouton plus petit.
+btn-dark : Utilise le style de bouton sombre.
+Le bouton "show" sert à afficher les détails d’un produit spécifique.
+
+Bouton "edit"
+html
+Copier le code
+<a href="{{ path('product_edit', {id: product.id}) }}" class="btn btn-sm btn-warning">
+    edit
+</a>
+path('product_edit', {id: product.id}) : Génère l'URL pour la route product_edit, en passant l'id du produit. Exemple d'URL générée :
+bash
+Copier le code
+/product/edit/5
+class="btn btn-sm btn-warning" :
+btn-warning : Applique un style jaune/orange pour indiquer une action d'édition.
+Ce bouton permet de rediriger l'utilisateur vers une page où il peut modifier les informations du produit.
+
+Bouton "delete"
+html
+Copier le code
+<a href="{{ path('product_delete', {id: product.id}) }}" class="btn btn-sm btn-danger">
+    delete
+</a>
+path('product_delete', {id: product.id}) : Génère l'URL pour la route product_delete, en transmettant l'ID du produit comme paramètre. Exemple d'URL :
+arduino
+Copier le code
+/product/delete/5
+class="btn btn-sm btn-danger" :
+btn-danger : Utilise un style rouge, généralement associé à des actions potentiellement destructrices (comme la suppression).
+Ce bouton est destiné à supprimer le produit correspondant.
+
+========================================================================
+GESTION DES CHAMPS NON MAPPES
+Dans le fichier ProductType on rajoute ce code pour eviter l'erreur
+
+'mapped' => false,
+
+Dans le contexte de Symfony, l'option 'mapped' => false est utilisée dans un formulaire pour indiquer qu'un champ de formulaire ne correspond pas directement à une propriété de l'entité associée. Voici une explication détaillée
+Contexte
+Lorsqu'on crée un formulaire Symfony avec une classe FormType (comme ProductType), les champs du formulaire sont généralement mappés à des propriétés de l'entité. Cela signifie :
+
+Les données saisies dans ces champs sont automatiquement transférées vers les propriétés correspondantes de l'entité.
+Symfony attend qu'il y ait une méthode getter et setter dans l'entité pour ces propriétés.
+Cependant, il y a des cas où un champ de formulaire ne doit pas être lié directement à une propriété de l'entité.
+Pourquoi utiliser 'mapped' => false ?
+Le champ n'a pas de correspondance dans l'entité :
+
+Exemple : Si vous ajoutez un champ pour télécharger une image, cette donnée ne sera pas directement mappée à une propriété comme image. En général, on stocke l'image téléchargée dans un fichier, et non directement dans l'entité. On peut ajouter ce champ au formulaire avec 'mapped' => false pour empêcher Symfony de cherch
 
 
 

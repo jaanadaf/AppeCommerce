@@ -21,7 +21,8 @@ class ProductType extends AbstractType
             ->add('price') // Champ pour le prix
             ->add('quantity') // Champ pour la quantité
             ->add('image', FileType::class, [ // Champ pour téléverser un fichier
-                'required' => false // Le fichier n'est pas obligatoire
+                'required' => false, // Le fichier n'est pas obligatoire
+                'mapped' => false,
             ])
             ->add('category', EntityType::class, [ // Champ pour choisir une catégorie
                 'class' => Category::class // Lié à l'entité Category
