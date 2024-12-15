@@ -33,7 +33,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for product in product %}
+                        {% for product in products %}
                         <tr>
                             <td>{{ loop.index }}</td>
                             <td>{{ product.name }}</td>
@@ -48,9 +48,20 @@
                                      class="fluid my-2 rounded">
                                 {% endif %}
                             </td>
+                            <td class="d-flex justify-content-around align-items-center">
+                                <a href="{{path('product_show', {id: product.id})}}" class="btn btn-sm btn-dark">
+                                    show
+                                </a>
+                                <a href="{{path('product_edit', {id: product.id})}}" class="btn btn-sm btn-warning">
+                                    edit
+                                </a>
+                                <a href="{{path('product_delete', {id: product.id})}}" class="btn btn-sm btn-danger">
+                                    delete
+                                </a>
+                            </td> 
                         </tr>
                         {% endfor %}
-                    </tbody>
+                    </tbody> 
                 </table>
             </div>
         </div>
