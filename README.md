@@ -2451,6 +2451,9 @@ Améliorations
 Images Responsives : Ajouter class="img-fluid" pour que les images s'adaptent à toutes les tailles d'écran.
 Structure : Utiliser les classes Bootstrap comme col-lg-6 pour de meilleures grilles sur les grands écrans.
 Lien Retour : Améliorer le lien retour avec un texte plus descriptif.
+=========================================================================
+ENREGISTRER LES COMMANDES DE L'UTILISATEUR
+---->création du controlleur OrderController
 
 
 
