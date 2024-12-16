@@ -76,6 +76,7 @@ class ProductController extends AbstractController
     {
         return $this->render('product/show.html.twig', [
             'product' => $product,
+            'photo_url' => 'http://127.0.0.1:8000/uploads/'
         ]);
     }
        
