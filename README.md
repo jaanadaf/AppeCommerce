@@ -2454,10 +2454,648 @@ Lien Retour : Améliorer le lien retour avec un texte plus descriptif.
 =========================================================================
 ENREGISTRER LES COMMANDES DE L'UTILISATEUR
 ---->création du controlleur OrderController
+LE CODE :
+<?php
+
+namespace App\Controller;
+
+use App\Entity\Order;
+use App\Entity\Product;
+use App\Repository\OrderRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\Persistence\ManagerRegistry;
+
+class OrderController extends AbstractController
+{
+
+    private $orderRepository;
+    private $entityManager;
+
+    public function __construct(
+        OrderRepository $orderRepository,
+        ManagerRegistry $doctrine
+    ) {
+        $this->orderRepository = $orderRepository;
+        $this->entityManager = $doctrine->getManager();
+    }
+
+    #[Route('/order', name: 'app_order')]
+    public function index(): Response
+    {
+        return $this->render('order/index.html.twig', [
+            'controller_name' => 'OrderController',
+        ]);
+    }
+
+    #[Route('/store/order/{product}', name: 'order_store')]
+    public function store(Product $product): Response
+    {
+        if(!$this->getUser()){
+            return $this->redirectToRoute('app_login');
+        }
+        $order = new Order();
+        $order->setPname($product->getName());
+        $order->setPrice($product->getPrice());
+        $order->setStatus('processing...');
+        $order->setUser($this->getUser());
 
 
+            // tell Doctrine you want to (eventually) save the Product (no queries yet)
+            $this->entityManager->persist($order);
+
+            // actually executes the queries (i.e. the INSERT query)
+            $this->entityManager->flush();
+
+            $this->addFlash(
+                'success',
+                'Your order was saved'
+            );
+
+            return $this->redirectToRoute('user_order_list');
+        }
+
+       
+    }
 
 
+------> EXPLICATION DU CODE:
+
+1. Déclaration du Contrôleur
+php
+Copier le code
+namespace App\Controller;
+
+use App\Entity\Order;
+use App\Entity\Product;
+use App\Repository\OrderRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\Persistence\ManagerRegistry;
+Namespace : Le contrôleur appartient au namespace App\Controller.
+Imports :
+Order : L'entité qui représente les commandes.
+Product : L'entité des produits.
+OrderRepository : Le repository pour accéder aux commandes.
+AbstractController : Classe de base pour les contrôleurs Symfony.
+Response : Pour renvoyer des réponses HTTP.
+Route : Annotation pour définir les routes.
+ManagerRegistry : Utilisé pour obtenir l'Entity Manager (gestionnaire des entités Doctrine).
+2. Propriétés et Constructeur
+php
+Copier le code
+private $orderRepository;
+private $entityManager;
+
+public function __construct(
+    OrderRepository $orderRepository,
+    ManagerRegistry $doctrine
+) {
+    $this->orderRepository = $orderRepository;
+    $this->entityManager = $doctrine->getManager();
+}
+$orderRepository : Instance du repository pour accéder aux commandes.
+$entityManager : Permet de gérer les opérations d'entités avec Doctrine.
+Le constructeur injecte ces dépendances pour que le contrôleur puisse accéder aux méthodes de l'Entity Manager et du repository.
+
+3. Action index() : Route /order
+php
+Copier le code
+#[Route('/order', name: 'app_order')]
+public function index(): Response
+{
+    return $this->render('order/index.html.twig', [
+        'controller_name' => 'OrderController',
+    ]);
+}
+Route : Définie par #[Route('/order', name: 'app_order')].
+L'URL /order appellera cette méthode.
+Le nom de la route est app_order.
+Template : La méthode utilise le template order/index.html.twig.
+But : Cette action affiche simplement une page de base pour les commandes.
+4. Action store() : Route /store/order/{product}
+php
+Copier le code
+#[Route('/store/order/{product}', name: 'order_store')]
+public function store(Product $product): Response
+{
+    if (!$this->getUser()) {
+        return $this->redirectToRoute('app_login');
+    }
+Route :
+L'URL /store/order/{product} permet de stocker une commande pour un produit spécifique.
+{product} est un paramètre qui injecte directement un objet Product grâce au ParamConverter de Symfony.
+Condition utilisateur :
+La méthode vérifie si l'utilisateur est authentifié grâce à $this->getUser().
+Si non, il est redirigé vers la page de connexion app_login.
+5. Création de la Commande
+php
+Copier le code
+$order = new Order();
+$order->setPname($product->getName());
+$order->setPrice($product->getPrice());
+$order->setStatus('processing...');
+$order->setUser($this->getUser());
+Nouvelle commande : Un nouvel objet Order est instancié.
+Attributs définis :
+setPname() : Définit le nom du produit à partir de $product->getName().
+setPrice() : Définit le prix du produit.
+setStatus() : Définit le statut de la commande à processing....
+setUser() : Associe la commande à l'utilisateur connecté.
+6. Persistance des données
+php
+Copier le code
+$this->entityManager->persist($product);
+$this->entityManager->flush();
+persist() : Prépare l'entité pour être sauvegardée dans la base de données.
+flush() : Exécute réellement l'INSERT ou UPDATE SQL dans la base de données.
+7. Flash Message et Redirection
+php
+Copier le code
+$this->addFlash(
+    'success',
+    'Your order was saved'
+);
+
+return $this->redirectToRoute('user_order_list');
+addFlash() : Ajoute un message de confirmation (type success) pour informer l'utilisateur que la commande a bien été enregistrée.
+Redirection : Après la sauvegarde, l'utilisateur est redirigé vers la route nommée user_order_list.
+Problème potentiel dans le code
+Il y a une erreur ici :
+
+php
+Copier le code
+$this->entityManager->persist($product);
+Il aurait fallu persister l'objet $order et non $product, car l'objet Order est celui qui contient les informations de commande.
+=========================================================================
+AJOUTER UNE FONCTION POUR AFFICHER LA COMMANDE QUE L'UTILISATEUR A PASSE
+
+---->Ajouter le formulaire d'enregistrement avec la commande suivante: 
+    php bin/console make:registration-form
+    et répondre aux question selon le besoin de notre application
+
+--->dans le fichier OrderController on rajoute la fonction suivante:
+
+LE CODE :
+ #[Route('/user/orders', name: 'user_order_list')]
+    public function userOrders(): Response
+    {
+        if(!$this->getUser()){
+            return $this->redirectToRoute('app_login');
+        }
+        return $this->render('order/user.html.twig', [
+            'user' => $this->getUser(),
+        ]);
+    }
+
+   ----> explication du code :
+   Voici une explication du code que vous avez partagé, qui semble être une méthode d'un contrôleur dans une application Symfony, écrite en PHP :
+
+Code détaillé et explication
+1. Annotation de Route :
+php
+Copier le code
+#[Route('/user/orders', name: 'user_order_list')]
+#[Route] : C'est une annotation qui définit une route pour accéder à cette méthode.
+/user/orders : Le chemin URL associé à cette méthode. Quand un utilisateur visite ce chemin dans le navigateur, cette méthode sera exécutée.
+name: 'user_order_list' : C'est le nom unique de la route. Ce nom peut être utilisé ailleurs dans l'application pour faire référence à cette route, comme dans des redirections ou des liens.
+2. Signature de la méthode :
+php
+Copier le code
+public function userOrders(): Response
+public : La méthode est accessible publiquement, ce qui signifie qu'elle peut être appelée lorsqu'un utilisateur visite la route correspondante.
+userOrders : Le nom de la méthode.
+: Response : Indique que la méthode retourne une réponse de type Response (classe de Symfony qui encapsule les réponses HTTP).
+3. Vérification de l'utilisateur :
+php
+Copier le code
+if (!$this->getUser()) {
+    return $this->redirectToRoute('app_login');
+}
+$this->getUser() : Méthode de Symfony qui retourne l'utilisateur actuellement connecté. Si aucun utilisateur n'est connecté, elle retourne null.
+if (!$this->getUser()) : Vérifie si aucun utilisateur n'est connecté.
+return $this->redirectToRoute('app_login'); : Redirige l'utilisateur non connecté vers la route nommée 'app_login', qui est probablement la page de connexion.
+Cette partie garantit que seuls les utilisateurs authentifiés peuvent accéder à cette méthode.
+
+4. Rendu d'un template :
+php
+Copier le code
+return $this->render('order/user.html.twig', [
+    'user' => $this->getUser(),
+]);
+$this->render() : Méthode de Symfony utilisée pour retourner une réponse HTML en rendant un fichier de template Twig.
+'order/user.html.twig' : Le fichier Twig à utiliser pour générer la page. Ce fichier est généralement situé dans le répertoire templates/order/.
+['user' => $this->getUser()] : Passe l'utilisateur actuellement connecté (retourné par getUser()) au template Twig sous la clé 'user'.
+Le template pourra ensuite accéder aux informations de l'utilisateur, par exemple, son nom ou ses commandes.
+
+Résumé
+Ce code :
+
+Définit une route accessible via /user/orders pour les utilisateurs connectés.
+Vérifie si un utilisateur est connecté. Si ce n'est pas le cas, il est redirigé vers la page de connexion.
+Rend un fichier de template (order/user.html.twig) et y passe l'utilisateur connecté en tant que variable.
+----> dans le fichier show.html.twig on fait queleques modifications :
+
+dans cette ligne il faut modifier la parametre product:
+
+ <a href="{{ path('order_store',{product: product.id}) }}" class="btn btn-sm btn-outline-dark mx-1">
+                    Order now
+                </a>
+--->explication :
+2. href="{{ path('order_store', {product: product.id}) }}" :
+La valeur de l’attribut href est générée dynamiquement à l’aide de la fonction path de Twig.
+
+path :
+
+Une fonction Twig qui génère l'URL d'une route Symfony en fonction de son nom et de ses paramètres.
+Le résultat de path remplace le contenu de l'attribut href.
+'order_store' :
+
+C'est le nom de la route dans Symfony (défini dans le contrôleur via une annotation ou un fichier de configuration).
+{product: product.id} :
+
+C'est un tableau associatif où product est le nom du paramètre attendu par la route order_store.
+product.id est une variable Twig, qui correspond à l'ID du produit passé au template.
+Cette valeur sera injectée dans l'URL.
+
+--->dans le fichier register.html.twig on rajoute quelques modification pour la mise en forme de notre formulaire
+
+LE CODE:
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block body %}
+    <div class="row my-5">
+        <div class="col-md-6 mx-auto">
+            <div class="card">
+                <div class="card-header">Register</div>
+                <div class="card-body">
+                    {{ form_start(registrationForm) }}
+                        {{ form_row(registrationForm.username) }}
+                        {{ form_row(registrationForm.plainPassword, {
+                            label: 'Password'
+                        }) }}
+                        {{ form_row(registrationForm.agreeTerms) }}
+
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    {{ form_end(registrationForm) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+EXPLICATION 
+
+1. Héritage du layout principal
+twig
+Copier le code
+{% extends 'base.html.twig' %}
+{% extends %} : Indique que ce template hérite d’un autre fichier appelé base.html.twig.
+base.html.twig : C’est généralement le fichier principal qui contient la structure de base de la page (comme le <html>, <head>, <body>, etc.).
+Ce mécanisme permet de réutiliser une structure commune pour toutes les pages et de ne définir que le contenu spécifique dans ce fichier.
+2. Bloc de titre
+twig
+Copier le code
+{% block title %}Register{% endblock %}
+{% block title %} : Définit le contenu du bloc title, qui sera inséré dans la section <title> du layout principal (base.html.twig).
+Ici, le titre est simplement défini comme "Register". Ce titre apparaît dans l’onglet du navigateur.
+3. Bloc de contenu principal (body)
+twig
+Copier le code
+{% block body %}
+    ...
+{% endblock %}
+{% block body %} : Définit le contenu principal de la page, qui sera inséré dans le bloc body du layout principal.
+Le contenu du bloc body contient une structure HTML avec un formulaire d’inscription.
+
+4. Structure HTML : Conteneur et mise en page
+html
+Copier le code
+<div class="row my-5">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+<div class="row my-5"> : Crée une rangée avec des marges verticales (my-5) pour espacer les éléments. C’est souvent utilisé dans Bootstrap.
+<div class="col-md-6 mx-auto"> : Définit une colonne qui occupe 6 colonnes de largeur sur un écran de taille moyenne et qui est centrée horizontalement (mx-auto).
+<div class="card"> : Crée une carte Bootstrap, utilisée pour styliser le contenu en une boîte visuelle.
+5. Formulaire d'inscription
+a. En-tête de la carte
+html
+Copier le code
+<div class="card-header">Register</div>
+Ajoute un en-tête à la carte, contenant simplement le texte "Register".
+b. Corps du formulaire
+twig
+Copier le code
+{{ form_start(registrationForm) }}
+    {{ form_row(registrationForm.username) }}
+    {{ form_row(registrationForm.plainPassword, { label: 'Password' }) }}
+    {{ form_row(registrationForm.agreeTerms) }}
+
+    <button type="submit" class="btn btn-primary">Register</button>
+{{ form_end(registrationForm) }}
+1. form_start et form_end :
+
+form_start(registrationForm) : Génère automatiquement le début du formulaire HTML (balise <form>), incluant l’URL d’action, la méthode (POST), et les attributs nécessaires.
+form_end(registrationForm) : Génère automatiquement la fermeture du formulaire (balise </form>).
+2. Champs du formulaire :
+
+form_row : Affiche un champ de formulaire complet avec son étiquette, son champ d’entrée, et les messages d’erreur éventuels.
+registrationForm.username : Champ pour le nom d’utilisateur.
+registrationForm.plainPassword : Champ pour le mot de passe, avec un label personnalisé défini par :
+twig
+Copier le code
+{ label: 'Password' }
+registrationForm.agreeTerms : Champ pour accepter les conditions d'utilisation.
+3. Bouton de soumission :
+
+html
+Copier le code
+<button type="submit" class="btn btn-primary">Register</button>
+Bouton qui soumet le formulaire.
+Stylisé avec Bootstrap en utilisant la classe btn btn-primary.
+============================================================================================
+AJOUTER LE LOGIN:
+
+PS C:\Users\ASUS\AppeCommerce>  php bin/console make:auth
+
+ What style of authentication do you want? [Empty authenticator]:
+  [0] Empty authenticator
+  [1] Login form authenticator
+ > 1
+
+ The class name of the authenticator to create (e.g. AppCustomAuthenticator):
+ > AppCustomAuthentificatior
+
+ Choose a name for the controller class (e.g. SecurityController) [SecurityController]:
+ > SecurityController
+
+ Do you want to generate a '/logout' URL? (yes/no) [yes]:
+ > yes
+
+ Do you want to support remember me? (yes/no) [yes]:
+ > no
+
+ created: src/Security/AppCustomAuthentificatiorAuthenticator.php
+ updated: config/packages/security.yaml
+ created: src/Controller/SecurityController.php
+ created: templates/security/login.html.twig
+
+ 
+  Success! 
+ 
+
+ Next:
+ - Customize your new authenticator.
+ - Finish the redirect "TODO" in the App\Security\AppCustomAuthentificatiorAuthenticator::onAuthenticationSuccess() method.  
+ - Review & adapt the login template: templates/security/login.html.twig
+
+---->explication :
+Ce code montre l'exécution de la commande Symfony php bin/console make:auth, utilisée pour générer une configuration d'authentification dans une application Symfony. Voici une explication détaillée des étapes et des résultats :
+
+1. Commande exécutée
+bash
+Copier le code
+php bin/console make:auth
+Cette commande permet de créer une infrastructure pour gérer l'authentification utilisateur dans une application Symfony.
+Elle guide le développeur via une série de questions pour configurer un authenticator et un contrôleur de sécurité.
+2. Questions posées et réponses
+a. "What style of authentication do you want?"
+bash
+Copier le code
+[0] Empty authenticator
+[1] Login form authenticator
+> 1
+Options proposées :
+Empty authenticator : Crée un fichier de base vide pour gérer l'authentification personnalisée. Utilisé si vous souhaitez un contrôle total sur le fonctionnement.
+Login form authenticator : Génère un authenticator pour gérer un formulaire de connexion.
+Réponse donnée : 1 (Login form authenticator)
+Symfony configure automatiquement un authenticator qui utilise un formulaire pour l'authentification.
+b. "The class name of the authenticator to create (e.g. AppCustomAuthenticator):"
+bash
+Copier le code
+> AppCustomAuthentificatior
+Le nom de la classe générée pour gérer l'authentification.
+Le fichier est créé dans le dossier src/Security/ avec le nom donné : AppCustomAuthentificatiorAuthenticator.php.
+Cette classe contient la logique pour valider les informations de connexion, comme l'email ou le mot de passe.
+c. "Choose a name for the controller class (e.g. SecurityController):"
+bash
+Copier le code
+> SecurityController
+Symfony génère un contrôleur pour gérer les routes associées à la sécurité (par exemple, afficher le formulaire de connexion).
+Le fichier est créé dans src/Controller/SecurityController.php.
+Ce fichier contient une méthode (généralement login()) pour rendre un fichier de template Twig et afficher la page de connexion.
+d. "Do you want to generate a '/logout' URL?"
+bash
+Copier le code
+> yes
+Réponse : yes signifie que Symfony générera une URL /logout pour permettre aux utilisateurs de se déconnecter.
+La déconnexion est configurée dans le fichier security.yaml.
+e. "Do you want to support remember me?"
+bash
+Copier le code
+> no
+Réponse : no signifie que la fonctionnalité "Remember Me" (se souvenir de l'utilisateur après la fermeture du navigateur) ne sera pas activée.
+3. Résultats générés par Symfony
+a. Fichier Authenticator
+plaintext
+Copier le code
+created: src/Security/AppCustomAuthentificatiorAuthenticator.php
+Fichier principal pour gérer l'authentification via un formulaire.
+Il contient des méthodes importantes comme :
+supports() : Vérifie si la requête contient les informations nécessaires pour une tentative de connexion.
+getCredentials() : Extrait les données (email, mot de passe) de la requête.
+checkCredentials() : Valide le mot de passe de l'utilisateur.
+onAuthenticationSuccess() : Gère ce qui se passe après une connexion réussie (ex. : redirection).
+b. Mise à jour du fichier security.yaml
+plaintext
+Copier le code
+updated: config/packages/security.yaml
+Symfony met à jour la configuration de sécurité dans security.yaml pour inclure :
+L'authenticator (AppCustomAuthentificatiorAuthenticator).
+Les routes /login et /logout.
+Les paramètres d'authentification.
+Exemple :
+
+yaml
+Copier le code
+security:
+    firewalls:
+        main:
+            form_login:
+                login_path: login
+                check_path: login
+            logout:
+                path: logout
+c. Fichier de contrôleur
+plaintext
+Copier le code
+created: src/Controller/SecurityController.php
+Ce fichier contient :
+Une méthode pour afficher le formulaire de connexion.
+Un lien vers le fichier Twig utilisé pour la mise en page.
+d. Template Twig
+plaintext
+Copier le code
+created: templates/security/login.html.twig
+Fichier généré dans templates/security/ pour afficher la page de connexion.
+Contient un formulaire qui envoie les données d'authentification à la route /login.
+4. Messages de succès et prochaines étapes
+plaintext
+Copier le code
+Success!
+
+Next:
+ - Customize your new authenticator.
+ - Finish the redirect "TODO" in the App\Security\AppCustomAuthentificatiorAuthenticator::onAuthenticationSuccess() method.
+ - Review & adapt the login template: templates/security/login.html.twig
+Personnaliser l'authenticator :
+
+Modifier la méthode onAuthenticationSuccess() dans le fichier AppCustomAuthentificatiorAuthenticator.php pour définir où rediriger l'utilisateur après une connexion réussie.
+Exemple : Rediriger l'utilisateur vers une page spécifique (ex. : tableau de bord).
+Adapter le template de connexion :
+
+Modifier login.html.twig pour correspondre à votre design ou ajouter des fonctionnalités spécifiques (par exemple, afficher des messages d'erreur).
+
+---->
+dans le fichier login.html.twig on a fait queleque modification pour que le formulaire représente un formulaire de connection
+LE CODE:
+{% extends 'base.html.twig' %}
+
+{% block title %}Log in!{% endblock %}
+
+{% block body %}
+    <div class="row my-5">
+        <div class="col-md-6 mx-auto">
+            <div class="card">
+                <div class="card-header">Register</div>
+                <div class="card-body">
+<form method="post">
+                    {% if error %}
+                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                    {% endif %}
+
+                    {% if app.user %}
+                        <div class="mb-3">
+                            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
+                        </div>
+                    {% endif %}
+
+                    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+                    <label for="inputUsername">Username</label>
+                    <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" autocomplete="username" required autofocus>
+                    <label for="inputPassword">Password</label>
+                    <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
+
+                    <input type="hidden" name="_csrf_token"
+                        value="{{ csrf_token('authenticate') }}"
+                    >
+
+                    <button class="btn btn-lg btn-primary" type="submit">
+                        Sign in
+                    </button>
+</form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+----->explication du code:
+Ce code est un fichier de template Twig pour une page de connexion dans Symfony. Il utilise une structure HTML et des blocs Twig pour gérer et afficher le formulaire de connexion ainsi que les messages d’erreur ou d’état.
+
+Structure du Code et Explication
+1. Extension du Layout Principal
+twig
+Copier le code
+{% extends 'base.html.twig' %}
+Le fichier hérite du layout principal base.html.twig.
+Ce layout contient probablement la structure commune de la page (comme le <html>, <head>, et <body>).
+2. Définition du Titre de la Page
+twig
+Copier le code
+{% block title %}Log in!{% endblock %}
+Définit le contenu du bloc title, qui sera inséré dans la balise <title> du layout principal.
+Ici, le titre affiché dans l'onglet du navigateur sera "Log in!".
+3. Définition du Corps de la Page
+twig
+Copier le code
+{% block body %}
+Le contenu principal de la page est défini ici. Il inclut plusieurs éléments : une structure de mise en page, un formulaire de connexion, et des messages d’état.
+
+4. Structure HTML Bootstrap
+html
+Copier le code
+<div class="row my-5">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header">Register</div>
+            <div class="card-body">
+row my-5 : Crée une rangée avec une marge verticale.
+col-md-6 mx-auto : Centrage horizontal avec une colonne de largeur moyenne (6 colonnes sur 12).
+card : Utilise une carte Bootstrap pour contenir le formulaire.
+5. Formulaire de Connexion
+Le formulaire HTML est défini à l’intérieur de la carte.
+
+a. Gestion des Messages d’Erreur
+twig
+Copier le code
+{% if error %}
+    <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+{% endif %}
+Si une erreur d’authentification survient (par exemple, mauvais mot de passe), elle sera affichée ici.
+error.messageKey : Contient le message d’erreur.
+trans() : Permet de traduire le message selon le domaine de traduction (security).
+b. Vérification de l’Utilisateur Actuellement Connecté
+twig
+Copier le code
+{% if app.user %}
+    <div class="mb-3">
+        You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
+    </div>
+{% endif %}
+Si un utilisateur est déjà connecté, un message l’indique, affichant son identifiant utilisateur via app.user.userIdentifier.
+Le lien de déconnexion utilise la route app_logout, qui est configurée dans le fichier security.yaml.
+c. Champ de Nom d’Utilisateur
+html
+Copier le code
+<label for="inputUsername">Username</label>
+<input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" autocomplete="username" required autofocus>
+last_username : Remplit automatiquement le champ avec le dernier nom d’utilisateur saisi en cas d’échec de connexion.
+autocomplete="username" : Optimise la saisie automatique dans le navigateur.
+d. Champ de Mot de Passe
+html
+Copier le code
+<label for="inputPassword">Password</label>
+<input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
+Champ standard pour la saisie du mot de passe.
+autocomplete="current-password" : Permet la saisie automatique du mot de passe enregistré dans le navigateur.
+e. Jeton CSRF
+html
+Copier le code
+<input type="hidden" name="_csrf_token"
+    value="{{ csrf_token('authenticate') }}">
+Ajoute un champ caché avec un jeton CSRF (Cross-Site Request Forgery).
+csrf_token('authenticate') : Génère un jeton pour sécuriser la soumission du formulaire contre les attaques CSRF.
+f. Bouton de Soumission
+html
+Copier le code
+<button class="btn btn-lg btn-primary" type="submit">
+    Sign in
+</button>
+Un bouton stylisé avec Bootstrap pour soumettre le formulaire.
+Il déclenche une requête POST vers la route de vérification configurée dans security.yaml (par défaut /login).
+6. Clôture des Blocs
+twig
+Copier le code
+{% endblock %}
+Termine le bloc body.
+
+---->sans oblié d'ajouter le redirection de la route qui se trouve dans le fichier AAppCustomAuthentificatiorAuthenticator
+ return new RedirectResponse($this->urlGenerator->generate('home'));
+ ===============================================
 
 
 

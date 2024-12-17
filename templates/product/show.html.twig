@@ -10,7 +10,7 @@
         <div class="col-md-12">
             <!-- Bouton de navigation pour retourner à la page d'accueil -->
             <div class="my-3 d-flex justify-content-start align-items-center">
-                <a href="{{ path('home') }}" class="btn btn-sm btn-outline-dark mx-1">
+                <a href="{{ path('order_store',{product: product.id}) }}" class="btn btn-sm btn-outline-dark mx-1">
                     Order now
                 </a>
             </div>
@@ -40,6 +40,7 @@
                                     <span class="text text-danger">{{ product.price }}€</span>
                                 </h5>
                                 <h5>
+                                    
                                     <span class="text text-success">{{ product.category.name }}</span>
                                 </h5>
                             </div>

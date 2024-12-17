@@ -32,6 +32,17 @@ class OrderController extends AbstractController
         ]);
     }
 
+    #[Route('/user/orders', name: 'user_order_list')]
+    public function userOrders(): Response
+    {
+        if(!$this->getUser()){
+            return $this->redirectToRoute('app_login');
+        }
+        return $this->render('order/user.html.twig', [
+            'user' => $this->getUser(),
+        ]);
+    }
+
     #[Route('/store/order/{product}', name: 'order_store')]
     public function store(Product $product): Response
     {
@@ -46,7 +57,7 @@ class OrderController extends AbstractController
 
 
             // tell Doctrine you want to (eventually) save the Product (no queries yet)
-            $this->entityManager->persist($product);
+            $this->entityManager->persist($order);
 
             // actually executes the queries (i.e. the INSERT query)
             $this->entityManager->flush();
