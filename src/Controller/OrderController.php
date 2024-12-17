@@ -89,5 +89,19 @@ class OrderController extends AbstractController
         return $this->redirectToRoute('orders_list');
     }
 
+    #[Route('/update/order/{order}', name: 'order_delete')]
+    
+    public function deleteOrder(Order $order): Response
+    {
+        $this->entityManager->remove($order);
+
+        // actually executes the queries (i.e. the INSERT query)
+        $this->entityManager->flush();
+        $this->addFlash(
+            'success',
+            'Your order was deleted'
+        );
+        return $this->redirectToRoute('orders_list');
+    }
 
 }
