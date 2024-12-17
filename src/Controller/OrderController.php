@@ -50,6 +50,21 @@ class OrderController extends AbstractController
         if(!$this->getUser()){
             return $this->redirectToRoute('app_login');
         }
+
+        $orderExist = $this->orderRepository->findOneBy([
+            'user' => $this->getUser(),
+            'pname' => $product->getName()
+        ]);
+        if($orderExist){
+            $this->addFlash(
+                'warning',
+                'You have already ordered this product'
+            );
+
+            return $this->redirectToRoute('user_order_list');
+        }
+        
+
         $order = new Order();
         $order->setPname($product->getName());
         $order->setPrice($product->getPrice());

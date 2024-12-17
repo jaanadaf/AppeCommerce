@@ -3508,7 +3508,151 @@ sur le site bootstrap on choisit le boutton dropdown pour selectionner le statut
         </div>
     </div>
 {% endblock %}
+=========================================================================
+LA SUPPRESSION DE LA COMMANDE:
+--->dans le fichier OrderController il faut rajouter ce code:
+#[Route('/update/order/{order}', name: 'order_delete')]
+    
+public function deleteOrder(Order $order): Response
+{
+    $this->entityManager->remove($order);
 
+    // actually executes the queries (i.e. the INSERT query)
+    $this->entityManager->flush();
+    $this->addFlash(
+        'success',
+        'Your order was deleted'
+    );
+    return $this->redirectToRoute('orders_list');
+}
+---> et dans le fichier order/index.html.twig il faut rajouter ce code:
+{% extends 'base.html.twig' %}
+
+{% block title %}Orders List{% endblock %}
+
+{% block body %}
+    <div class="row my-5">
+        <div class="col-md-10 mx-auto">
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success">
+                    {{message}}
+                </div>
+            {% endfor %}
+            <div class="card">
+                <div class="card-header">
+                    Orders List
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Product Name</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td>{{loop.index}}</td>
+                                    <td>{{order.user.username}}</td>
+                                    <td>{{order.pname}}</td>
+                                    <td>{{order.price}}</td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                                {{order.status}}
+                                            </button>
+                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                                <li><a class="dropdown-item" 
+                                                href="{{path('order_status_update',{order: order.id,status: 'shipped'})}}">Shipped</a></li>
+                                                <li><a class="dropdown-item" href="{{path('order_status_update',{order: order.id,status: 'rejected'})}}">Rejected</a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <form id="{{order.id}}" action="{{path('order_delete',{order: order.id})}}"
+                                            method="post"></form>
+                                        <button onclick="deleteItem('{{order.id}}')" class="btn btn-sm btn-danger">
+                                            delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+==========================================================================
+MESSAGE D'ERREUR QUAND L'UTILISATEUR VEUT COMMANDER DEUX FOIS LE MEME PRODUITS
+LE CODE :
+---->dans le fichier OrederController il faut rajouter ce code dans la route <store>
+store/order pour tester si le meme utilisateur a commandé le meme produit:
+
+$orderExist = $this->orderRepository->findOneBy([
+'user' => $this->getUser(),
+'pname' => $product->getName()
+]);
+if($orderExist){
+$this->addFlash(
+    'warning',
+    'You have already ordered this product'
+);
+
+return $this->redirectToRoute('user_order_list');
+}
+ EXPLICATION DU CODE:
+
+ 1. Recherche d'une commande existante
+php
+Copier le code
+$orderExist = $this->orderRepository->findOneBy([
+    'user' => $this->getUser(),
+    'pname' => $product->getName()
+]);
+$this->orderRepository : C'est le dépôt (repository) associé à l'entité Order. Il est utilisé pour interagir avec la base de données.
+
+findOneBy() : Cette méthode recherche une seule entité Order dans la base de données en fonction de critères spécifiques.
+
+'user' => $this->getUser() : Vérifie si l'utilisateur connecté ($this->getUser()) est associé à une commande.
+'pname' => $product->getName() : Vérifie si la commande concerne un produit dont le nom est égal au nom du produit actuel ($product->getName()).
+Si une commande correspondante est trouvée, elle est assignée à la variable $orderExist. Sinon, $orderExist sera null.
+
+2. Vérification de l'existence de la commande
+php
+Copier le code
+if($orderExist){
+    $this->addFlash(
+        'warning',
+        'You have already ordered this product'
+    );
+
+    return $this->redirectToRoute('user_order_list');
+}
+Condition if($orderExist) :
+Si une commande correspondant aux critères (utilisateur actuel et nom de produit) existe, cette condition est vraie.
+Cela empêche l'utilisateur de commander à nouveau le même produit.
+a. Ajout d'un message flash
+php
+Copier le code
+$this->addFlash(
+    'warning',
+    'You have already ordered this product'
+);
+addFlash() : Ajoute un message temporaire pour informer l'utilisateur.
+Type : 'warning' : Indique qu'il s'agit d'un avertissement.
+Message : 'You have already ordered this product' : Texte affiché à l'utilisateur pour signaler qu'il a déjà commandé ce produit.
+b. Redirection
+php
+Copier le code
+return $this->redirectToRoute('user_order_list');
+redirectToRoute('user_order_list') : Redirige l'utilisateur vers la page affichant la liste de ses commandes (user_order_list).
 
 
 
