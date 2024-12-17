@@ -24,11 +24,12 @@ class OrderController extends AbstractController
         $this->entityManager = $doctrine->getManager();
     }
 
-    #[Route('/order', name: 'app_order')]
+    #[Route('/order', name: 'orders_list')]
     public function index(): Response
     {
+        $orders = $this->orderRepository->findAll();
         return $this->render('order/index.html.twig', [
-            'controller_name' => 'OrderController',
+            'orders' => $orders,
         ]);
     }
 
@@ -70,7 +71,23 @@ class OrderController extends AbstractController
             return $this->redirectToRoute('user_order_list');
         }
 
-       
+    #[Route('/update/order/{order}/{status}', name: 'order_status_update')]
+    public function updateOrderStatus(Order $order,$status): Response
+    {
+        // Validation des statuts autorisés
+        $order->setStatus($status);
+        $this->entityManager->persist($order);
+
+        // Mise à jour du statut
+        $this->entityManager->flush();
+        // Ajout d'un message flash
+        $this->addFlash(
+            'success',
+            'Your order status was updated'
+        );
+        // Redirection vers la liste des commandes
+        return $this->redirectToRoute('orders_list');
     }
 
 
+}

@@ -3095,7 +3095,421 @@ Termine le bloc body.
 
 ---->sans oblié d'ajouter le redirection de la route qui se trouve dans le fichier AAppCustomAuthentificatiorAuthenticator
  return new RedirectResponse($this->urlGenerator->generate('home'));
- ===============================================
+ ==========================================================================================
+ AFFICHAGE DES ORDERS
+ --->dans le fichier user.html.twig on rajoute ce code :
+ {% extends 'base.html.twig' %}
+
+{% block title %}My Orders List{% endblock %}
+
+{% block body %}
+
+        
+        <div class="card my-5">
+            <div class="card-header ">  
+                My Orders
+            </div>
+            <div class="card-body">
+                <!-- Tableau des produits -->
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                          
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in user.orders %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ order.pname }}</td>
+                            <td>{{ order.price }}</td>
+                            <td>{{ order.status }}</td>
+                         
+                        </tr>
+                        {% endfor %}
+                    </tbody> 
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+--->explication du code
+Ce code est un fichier Twig pour afficher la liste des commandes de l'utilisateur connecté. Il utilise une structure HTML avec le framework Bootstrap pour styliser la table et le contenu. Voici une explication détaillée de chaque partie :
+
+Structure Générale
+1. Extension du Layout Principal
+twig
+Copier le code
+{% extends 'base.html.twig' %}
+Le fichier étend un layout principal nommé base.html.twig.
+Ce layout contient probablement les sections communes comme le header, le footer, et les balises <html> et <body>.
+2. Bloc Titre
+twig
+Copier le code
+{% block title %}My Orders List{% endblock %}
+Définit le contenu du bloc title, inséré dans la balise <title> du layout principal.
+Le titre affiché dans l'onglet du navigateur sera "My Orders List".
+3. Bloc Corps (Body)
+twig
+Copier le code
+{% block body %}
+Le contenu principal de la page est défini ici.
+
+Détails du Bloc body
+a. Carte Bootstrap
+html
+Copier le code
+<div class="card my-5">
+    <div class="card-header ">  
+        My Orders
+    </div>
+card my-5 : Utilise une carte Bootstrap avec une marge verticale (my-5) pour un espacement.
+La carte est un conteneur pour afficher le tableau des commandes.
+b. Tableau des Commandes
+i. Structure du Tableau
+html
+Copier le code
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Product Name</th>
+            <th>Price</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+table table-bordered table-hover :
+Applique le style Bootstrap pour un tableau bordé et interactif (lignes survolées).
+En-tête (thead) : Définit les colonnes du tableau avec des titres comme ID, Product Name, Price, et Status.
+ii. Corps du Tableau avec Boucle for
+twig
+Copier le code
+<tbody>
+    {% for order in user.orders %}
+    <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ order.pname }}</td>
+        <td>{{ order.price }}</td>
+        <td>{{ order.status }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+Boucle for :
+Itère sur la collection user.orders, qui contient les commandes de l'utilisateur.
+Chaque élément dans la collection est une commande (order).
+iii. Données des Colonnes
+loop.index :
+Numérotation automatique des lignes dans le tableau.
+Commence à partir de 1.
+order.pname :
+Affiche le nom du produit.
+order.price :
+Affiche le prix du produit.
+order.status :
+Affiche le statut de la commande (par exemple, "Pending", "Completed").
+c. Fermeture des Balises
+html
+Copier le code
+</div>
+</div>
+{% endblock %}
+Ferme les balises ouvertes pour structurer le tableau et le design.
+Résumé du Fonctionnement
+Contexte :
+
+La page affiche une liste des commandes pour l'utilisateur connecté.
+Les données sont fournies via un objet user accessible dans Twig, qui contient une propriété orders.
+Affichage :
+
+Les commandes sont présentées dans une table avec Bootstrap.
+Chaque commande affiche :
+ID : L'indice de la commande dans la liste.
+Nom du Produit : Nom du produit commandé.
+Prix : Montant de la commande.
+Statut : L'état de la commande.
+Design :
+
+Utilisation de Bootstrap pour styliser les composants comme les cartes et le tableau.
+Améliorations Possibles
+Gestion des Commandes Vides :
+
+Ajouter un message lorsque l'utilisateur n'a pas de commandes :
+twig
+Copier le code
+{% if user.orders is empty %}
+    <p class="text-center">You have no orders yet.</p>
+{% endif %}
+Formatage des Prix :
+
+Afficher les prix dans un format monétaire :
+twig
+Copier le code
+<td>{{ order.price|number_format(2, '.', ',') }} €</td>
+Couleurs pour les Statuts :
+
+Ajouter une classe CSS conditionnelle pour le statut :
+twig
+Copier le code
+<td class="{% if order.status == 'Completed' %}text-success{% else %}text-warning{% endif %}">
+    {{ order.status }}
+</td>
+===========================================================================================
+AJOUTER LE TOTAL DE LA COMMANDE DANS LA PAGE user/order
+dans le fichier user.html.twig
+on rajoute le code suivant: 
+
+ {% set sum = 0 %}
+                        {% for order in user.orders %}
+                            {% set sum = sum + order.price %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ order.pname }}</td>
+                                <td>{{ order.price }}</td>
+                                <td>{{ order.status }}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="text-center">
+                            <th colspan="3">Total</th>
+                            <td class="fw-bold">{{ sum }}€</td>
+                        </tr>
+                        
+                        </tr>
+--->explication du code :
+La boucle for parcourt chaque commande dans user.orders.
+À chaque itération, la variable sum est mise à jour en ajoutant le prix de la commande actuelle (order.price).
+loop.index : Affiche l'indice de l'itération actuelle, commençant à 1. Cela correspond à l'ID de la commande dans le tableau.
+order.pname : Affiche le nom du produit de la commande.
+order.price : Affiche le prix de la commande.
+order.status : Affiche le statut de la commande.
+3. Affichage du total
+twig
+Copier le code
+<tr class="text-center">
+    <th colspan="3">Total</th>
+    <td class="fw-bold">{{ sum }}€</td>
+</tr>
+Cette ligne de code est utilisée pour afficher le total des prix.
+<th colspan="3">Total</th> : Affiche le mot "Total" et occupe 3 colonnes grâce à l'attribut colspan="3".
+<td class="fw-bold">{{ sum }}€</td> : Affiche le total des prix calculé par la somme de toutes les commandes, avec un format monétaire. La classe fw-bold applique une police en gras.
+===========================================================================================
+AJOUTER LE STATUT DE LA COMMANDE
+
+----> dans le fichier user.html.twig il faut rajouter ce code dans le <tbody>
+<td>
+                                    {% if order.status == 'processing...' %}
+                                    <span class="badge bg-dark p-2">
+                                        {{order.status}}
+                                    </span>
+                                {% elseif order.status == 'shipped' %}
+                                    <span class="badge bg-success p-2">
+                                        {{order.status}}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger p-2">
+                                        {{order.status}}
+                                    </span>
+                                {% endif %}
+                                </td>
+
+----->explication du code :
+1. Balise <td>
+html
+Copier le code
+<td>
+Cette balise représente une cellule dans un tableau (<tr>), et elle contient le statut de la commande.
+2. Condition if pour vérifier le statut de la commande
+twig
+Copier le code
+{% if order.status == 'processing...' %}
+La première condition vérifie si le statut de la commande est exactement 'processing...' (en cours de traitement).
+Si c'est vrai, un badge stylisé avec la classe bg-dark (pour un fond sombre) sera affiché avec le texte du statut.
+3. Premier cas (statut "processing...")
+twig
+Copier le code
+<span class="badge bg-dark p-2">
+    {{ order.status }}
+</span>
+Si la commande est en traitement, un badge sombre (avec fond noir) est affiché.
+p-2 : Ajoute un padding autour du texte dans le badge.
+{{ order.status }} : Affiche le statut de la commande (ici, processing...).
+4. Deuxième condition elseif pour le statut "shipped"
+twig
+Copier le code
+{% elseif order.status == 'shipped' %}
+La condition elseif vérifie si le statut de la commande est 'shipped' (expédiée).
+Si le statut correspond, un badge avec la classe bg-success (fond vert) sera affiché.
+5. Deuxième cas (statut "shipped")
+twig
+Copier le code
+<span class="badge bg-success p-2">
+    {{ order.status }}
+</span>
+Si la commande est expédiée, un badge vert est affiché.
+Le texte affiché est le statut de la commande (shipped), et il est stylisé avec une couleur de fond verte (bg-success).
+6. Troisième condition else pour les autres statuts
+twig
+Copier le code
+{% else %}
+Si aucune des deux premières conditions n'est remplie (c'est-à-dire si le statut est autre que 'processing...' ou **'shipped'), cette condition else est exécutée.
+7. Troisième cas (autres statuts)
+twig
+Copier le code
+<span class="badge bg-danger p-2">
+    {{ order.status }}
+</span>
+Si le statut de la commande ne correspond pas à 'processing...' ni à 'shipped', un badge rouge est affiché.
+La classe bg-danger donne une couleur de fond rouge au badge (en général utilisée pour signaler un problème ou un statut d'alerte).
+8. Fermeture des balises
+html
+Copier le code
+</td>
+Cette balise ferme la cellule du tableau <td>.
+Résumé du fonctionnement
+Le code vérifie le statut de la commande et affiche un badge avec un style différent en fonction de ce statut :
+
+processing... : Affiche un badge avec un fond sombre (bg-dark).
+shipped : Affiche un badge avec un fond vert (bg-success).
+Autres statuts : Affiche un badge avec un fond rouge (bg-danger).
+Le badge utilise des classes Bootstrap pour les couleurs (bg-dark, bg-success, bg-danger) et du padding (p-2) pour espacer le texte du badge.
+
+Utilité
+Ce code est très utile pour afficher visuellement l'état d'une commande avec des couleurs distinctes, ce qui permet aux utilisateurs de voir rapidement le statut de leurs commandes (par exemple, en cours de traitement, expédiée, ou en attente de traitement).
+============================================================================================
+LES TACHES RESERVEES  A L'ADMIN CONCERNANT LE STATUT DE LA COMMANDE:
+rejeced, shipped et progrssing
+--->le fichier OrderController on rajoute ce code:
+
+ #[Route('/update/order/{order}/{status}', name: 'order_status_update')]
+    public function updateOrderStatus(Order $order,$status): Response
+    {
+        // Validation des statuts autorisés
+        $order->setStatus($status);
+        $this->entityManager->persist($order);
+
+        // Mise à jour du statut
+        $this->entityManager->flush();
+        // Ajout d'un message flash
+        $this->addFlash(
+            'success',
+            'Your order status was updated'
+        );
+        // Redirection vers la liste des commandes
+        return $this->redirectToRoute('orders_list');
+    }
+    --->explication du code:
+    1. Annotation de route
+php
+Copier le code
+#[Route('/update/order/{order}/{status}', name: 'order_status_update')]
+/update/order/{order}/{status} : Cette route définit l'URL qui déclenchera ce contrôleur. Elle contient deux paramètres dynamiques :
+{order} : représente l'identifiant de la commande (Order).
+{status} : représente le nouveau statut de la commande.
+name: 'order_status_update' : Le nom de la route, utilisé pour générer des URLs avec path() dans les templates Twig ou dans le code.
+2. Paramètres du contrôleur
+php
+Copier le code
+public function updateOrderStatus(Order $order, $status): Response
+Order $order : Grâce au paramètre de route {order}, Symfony utilise le mécanisme de "param converter" pour transformer l'identifiant passé dans l'URL en une entité Order correspondante.
+$status : Ce paramètre représente la valeur du statut envoyée dans l'URL.
+3. Mise à jour du statut de la commande
+php
+Copier le code
+$order->setStatus($status);
+$this->entityManager->persist($order);
+$order->setStatus($status) : Modifie le statut de la commande avec la valeur du paramètre $status.
+$this->entityManager->persist($order) : Indique que l'entité Order doit être sauvegardée ou mise à jour dans la base de données. Cependant, pour les entités déjà existantes, l'appel à persist() est facultatif.
+4. Validation et exécution des modifications
+php
+Copier le code
+$this->entityManager->flush();
+flush() : Envoie toutes les modifications accumulées (ici, la mise à jour du statut de la commande) vers la base de données. Cela exécute les requêtes SQL correspondantes.
+5. Message flash
+php
+Copier le code
+$this->addFlash(
+    'success',
+    'Your order status was updated'
+);
+addFlash() : Ajoute un message temporaire à la session pour l'afficher à l'utilisateur après la redirection.
+'success' : Type du message (utile pour le style CSS, comme un message de succès ou d'erreur).
+'Your order status was updated' : Contenu du message.
+Les messages flash sont particulièrement utiles dans les redirections, car ils permettent de communiquer avec l'utilisateur sans persister l'information ailleurs.
+
+6. Redirection
+php
+Copier le code
+return $this->redirectToRoute('orders_list');
+redirectToRoute() : Redirige l'utilisateur vers une autre route.
+'orders_list' : Nom de la route où l'utilisateur est redirigé après la mise à jour.
+Cela garantit que l'utilisateur voit une version actualisée de la liste des commandes après avoir modifié le statut.
+
+---> dans le fichier order/index.html.twig on rajoute ce code :
+sur le site bootstrap on choisit le boutton dropdown pour selectionner le statut.
+{% block body %}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} mt-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+        
+    <div class="card my-5">
+        <div class="card-header ">  
+            Orders List
+        </div>
+        <div class="card-body">
+            <!-- Tableau des produits -->
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product Name</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ order.pname }}</td>
+                            <td>{{ order.price }}</td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                        {{ order.status }}
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                        <li>
+                                            <a class="dropdown-item" 
+                                                href="{{ path('order_status_update', {order: order.id, status: 'shipped'}) }}">
+                                                Shipped
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" 
+                                                href="{{ path('order_status_update', {order: order.id, status: 'rejected'}) }}">
+                                                Rejected
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody> 
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+
 
 
 
