@@ -5,34 +5,37 @@ namespace App\Controller;
 use App\Entity\Order;
 use App\Entity\Product;
 use App\Repository\OrderRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class OrderController extends AbstractController
 {
-
     private $orderRepository;
     private $entityManager;
 
     public function __construct(
         OrderRepository $orderRepository,
-        ManagerRegistry $doctrine
-    ) {
+        ManagerRegistry $doctrine)
+    {
         $this->orderRepository = $orderRepository;
         $this->entityManager = $doctrine->getManager();
     }
-
-    #[Route('/order', name: 'orders_list')]
+       
+    #[Route('/orders', name: 'orders_list')]
+    /**
+     * @IsGranted("ROLE_ADMIN", statusCode=404, message="Page not found")
+     */
     public function index(): Response
     {
         $orders = $this->orderRepository->findAll();
         return $this->render('order/index.html.twig', [
-            'orders' => $orders,
+            'orders' => $orders
         ]);
     }
-
+    
     #[Route('/user/orders', name: 'user_order_list')]
     public function userOrders(): Response
     {
@@ -51,61 +54,58 @@ class OrderController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $orderExist = $this->orderRepository->findOneBy([
+        $orderExists = $this->orderRepository->findOneBy([
             'user' => $this->getUser(),
             'pname' => $product->getName()
         ]);
-        if($orderExist){
+
+        if($orderExists){
             $this->addFlash(
                 'warning',
-                'You have already ordered this product'
+                'Your have already ordered this product'
             );
-
             return $this->redirectToRoute('user_order_list');
         }
-        
 
         $order = new Order();
         $order->setPname($product->getName());
         $order->setPrice($product->getPrice());
         $order->setStatus('processing...');
         $order->setUser($this->getUser());
+        // tell Doctrine you want to (eventually) save the Product (no queries yet)
+        $this->entityManager->persist($order);
 
-
-            // tell Doctrine you want to (eventually) save the Product (no queries yet)
-            $this->entityManager->persist($order);
-
-            // actually executes the queries (i.e. the INSERT query)
-            $this->entityManager->flush();
-
-            $this->addFlash(
-                'success',
-                'Your order was saved'
-            );
-
-            return $this->redirectToRoute('user_order_list');
-        }
+        // actually executes the queries (i.e. the INSERT query)
+        $this->entityManager->flush();
+        $this->addFlash(
+            'success',
+            'Your order was saved'
+        );
+        return $this->redirectToRoute('user_order_list');
+    }
 
     #[Route('/update/order/{order}/{status}', name: 'order_status_update')]
+    /**
+     * @IsGranted("ROLE_ADMIN", statusCode=404, message="Page not found")
+     */
     public function updateOrderStatus(Order $order,$status): Response
     {
-        // Validation des statuts autorisés
         $order->setStatus($status);
         $this->entityManager->persist($order);
 
-        // Mise à jour du statut
+        // actually executes the queries (i.e. the INSERT query)
         $this->entityManager->flush();
-        // Ajout d'un message flash
         $this->addFlash(
             'success',
             'Your order status was updated'
         );
-        // Redirection vers la liste des commandes
         return $this->redirectToRoute('orders_list');
     }
 
     #[Route('/update/order/{order}', name: 'order_delete')]
-    
+    /**
+     * @IsGranted("ROLE_ADMIN", statusCode=404, message="Page not found")
+     */
     public function deleteOrder(Order $order): Response
     {
         $this->entityManager->remove($order);
@@ -118,5 +118,4 @@ class OrderController extends AbstractController
         );
         return $this->redirectToRoute('orders_list');
     }
-
 }

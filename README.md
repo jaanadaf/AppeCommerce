@@ -3607,7 +3607,7 @@ $this->addFlash(
 
 return $this->redirectToRoute('user_order_list');
 }
- EXPLICATION DU CODE:
+ ------>EXPLICATION DU CODE:
 
  1. Recherche d'une commande existante
 php
@@ -3653,6 +3653,225 @@ php
 Copier le code
 return $this->redirectToRoute('user_order_list');
 redirectToRoute('user_order_list') : Redirige l'utilisateur vers la page affichant la liste de ses commandes (user_order_list).
+=================================================================================================================
+AJOUTER LE MENU PRINCIPAL
+----->tester si l'utilisateur est connecté ou pas Sinon il doit doit s'enregistrer et quand il est connecté il aura sa Page
+LE CODE:
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Account
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        {% if not app.user %}
+            <li><a class="dropdown-item" href="{{path('app_register')}}">Sign up</a></li>
+            <li><a class="dropdown-item" href="{{path('app_login')}}">Sign in</a></li>
+        {% else %}
+            <li><a class="dropdown-item" href="#">{{app.user.username}}</a></li>
+            <li><a class="dropdown-item" href="{{path('app_logout')}}">Logout</a></li>
+        {% endif %}
+    </ul>
+</li>
+
+------>explication du code
+Voici une explication détaillée de ce bloc de code HTML et Twig (un moteur de templates utilisé notamment avec Symfony) :
+
+Structure HTML et Bootstrap
+1. Balise <li> (élément de la liste)
+html
+Copier le code
+<li class="nav-item dropdown">
+Définit un élément de liste dans un menu de navigation.
+La classe nav-item est spécifique à Bootstrap et indique qu'il s'agit d'un élément de navigation.
+La classe dropdown permet de signaler que cet élément contient un sous-menu déroulant.
+2. Lien déclencheur du menu déroulant
+html
+Copier le code
+<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Account
+</a>
+class="nav-link dropdown-toggle" :
+
+nav-link : applique un style Bootstrap aux liens de navigation.
+dropdown-toggle : rend le lien interactif, permettant de déclencher un menu déroulant.
+href="#" :
+
+Le # indique que ce lien ne redirige pas vers une page spécifique.
+Il sert uniquement de déclencheur pour le menu déroulant.
+id="navbarDropdown" :
+
+Cet identifiant relie le lien au menu déroulant via l'attribut aria-labelledby du menu.
+role="button" :
+
+Indique que cet élément agit comme un bouton.
+data-bs-toggle="dropdown" :
+
+Un attribut Bootstrap pour activer le comportement du menu déroulant.
+aria-expanded="false" :
+
+Accessibilité (ARIA). Indique que le menu n'est pas encore déroulé.
+Sous-menu déroulant
+3. Liste du menu déroulant
+html
+Copier le code
+<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+class="dropdown-menu" :
+
+Applique le style Bootstrap pour un menu déroulant.
+aria-labelledby="navbarDropdown" :
+
+Lie ce menu déroulant au lien déclencheur grâce à son id.
+Logique Twig pour afficher le contenu dynamique
+4. Condition pour afficher les liens
+twig
+Copier le code
+{% if not app.user %}
+Vérifie si aucun utilisateur n'est connecté (app.user est null ou non défini).
+Si aucun utilisateur n'est connecté, affiche les liens "Sign up" et "Sign in".
+html
+Copier le code
+<li><a class="dropdown-item" href="{{path('app_register')}}">Sign up</a></li>
+<li><a class="dropdown-item" href="{{path('app_login')}}">Sign in</a></li>
+path('app_register') :
+Génère l'URL pour la route nommée app_register (page d'inscription).
+path('app_login') :
+Génère l'URL pour la route nommée app_login (page de connexion).
+5. Affichage pour un utilisateur connecté
+twig
+Copier le code
+{% else %}
+Si un utilisateur est connecté, le code affiche :
+Son nom d'utilisateur.
+Un lien pour se déconnecter.
+html
+Copier le code
+<li><a class="dropdown-item" href="#">{{app.user.username}}</a></li>
+<li><a class="dropdown-item" href="{{path('app_logout')}}">Logout</a></li>
+app.user.username :
+
+Affiche le nom d'utilisateur de l'utilisateur connecté.
+path('app_logout') :
+
+Génère l'URL pour la route nommée app_logout (déconnexion).
+----->si l'utilisateur est un rolr Admin
+LE CODE :
+{% if is_granted('ROLE_ADMIN') %}
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Admin
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <li><a class="dropdown-item" href="{{path('product_list')}}">Products</a></li>
+        <li><a class="dropdown-item" href="{{path('product_store')}}">Create product</a></li>
+        <li><a class="dropdown-item" href="{{path('orders_list')}}">Orders</a></li>
+    </ul>
+</li>
+{% endif %}
+
+----->explication du code:
+Ce code utilise Twig, le moteur de templates de Symfony, pour afficher une partie de l'interface utilisateur réservée aux administrateurs. Voici une explication détaillée :
+
+Condition pour vérifier le rôle d'administrateur
+twig
+Copier le code
+{% if is_granted('ROLE_ADMIN') %}
+is_granted('ROLE_ADMIN') :
+Vérifie si l'utilisateur actuellement connecté possède le rôle ROLE_ADMIN.
+Le rôle ROLE_ADMIN est généralement attribué dans la base de données (champ roles), ou via un service de gestion des droits dans Symfony.
+Si l'utilisateur a ce rôle, le contenu à l'intérieur de la condition est affiché.
+Structure du menu déroulant pour les administrateurs
+1. Conteneur principal du menu déroulant
+html
+Copier le code
+<li class="nav-item dropdown">
+Définit un élément de liste dans un menu de navigation.
+Les classes nav-item et dropdown sont utilisées par Bootstrap pour styliser et activer le menu déroulant.
+2. Lien déclencheur du menu
+html
+Copier le code
+<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Admin
+</a>
+nav-link : Style de Bootstrap pour un lien de navigation.
+dropdown-toggle : Permet à l'élément d'agir comme un déclencheur pour un menu déroulant.
+href="#" : Le lien ne redirige pas vers une page spécifique mais sert uniquement de bouton pour afficher le menu.
+id="navbarDropdown" : Identifiant utilisé pour lier le bouton au menu déroulant via aria-labelledby.
+data-bs-toggle="dropdown" : Attribut Bootstrap pour activer le menu déroulant.
+aria-expanded="false" : Indique (pour les technologies d'accessibilité) que le menu est initialement replié.
+3. Sous-menu pour les administrateurs
+html
+Copier le code
+<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+dropdown-menu : Classe Bootstrap qui stylise le menu déroulant.
+aria-labelledby="navbarDropdown" : Associe le menu déroulant à son déclencheur pour des raisons d'accessibilité.
+Liens dans le menu déroulant
+a. Lien vers la liste des produits
+html
+Copier le code
+<li><a class="dropdown-item" href="{{path('product_list')}}">Products</a></li>
+dropdown-item : Classe Bootstrap pour styliser chaque élément du menu.
+href="{{path('product_list')}}" :
+Génère une URL vers la route Symfony nommée product_list.
+La route product_list pourrait correspondre à une page affichant la liste de tous les produits.
+b. Lien pour créer un produit
+html
+Copier le code
+<li><a class="dropdown-item" href="{{path('product_store')}}">Create product</a></li>
+href="{{path('product_store')}}" :
+Génère une URL vers la route Symfony nommée product_store.
+Cette route pourrait pointer vers un formulaire pour ajouter un nouveau produit.
+c. Lien vers la liste des commandes
+html
+Copier le code
+<li><a class="dropdown-item" href="{{path('orders_list')}}">Orders</a></li>
+href="{{path('orders_list')}}" :
+Génère une URL vers la route Symfony nommée orders_list.
+Cette route pourrait correspondre à une page où l'administrateur peut consulter toutes les commandes.
+=========================================================================
+LIMIER L'ACCES A CERTAINE PAGE AUX UTILISATEURS 
+--->dans le fichier ProductController il faut rajouter les annottions
+dans les routes sensibles
+
+/**
+* @IsGranted("ROLE_ADMIN", statusCode=404, message="Page not found")
+*/
+---->explication du code:
+L'annotation @IsGranted est utilisée dans Symfony pour contrôler l'accès à une méthode ou à un contrôleur en fonction des rôles de l'utilisateur. C'est une partie de la gestion de la sécurité dans Symfony, et elle est utilisée pour valider si un utilisateur possède le rôle nécessaire pour accéder à une action spécifique.
+
+Voici une explication détaillée de l'annotation que vous avez fournie :
+
+php
+Copier le code
+/**
+ * @IsGranted("ROLE_ADMIN", statusCode=404, message="Page not found")
+ */
+1. @IsGranted
+Cette annotation provient de SensioFrameworkExtraBundle, un bundle qui étend Symfony pour offrir des fonctionnalités supplémentaires, comme la gestion des annotations.
+Elle est utilisée pour autoriser ou refuser l'accès à une méthode ou à un contrôleur, en fonction du rôle ou des droits de l'utilisateur.
+2. "ROLE_ADMIN"
+C'est le premier argument de l'annotation, et il spécifie le rôle requis pour accéder à la méthode ou au contrôleur.
+Dans ce cas, ROLE_ADMIN est un rôle spécifique que l'utilisateur doit avoir. Si l'utilisateur n'a pas ce rôle, l'accès à la méthode ou à l'action est refusé.
+Vous pouvez remplacer "ROLE_ADMIN" par n'importe quel rôle que vous souhaitez vérifier, par exemple "ROLE_USER" ou un rôle personnalisé.
+3. statusCode=404
+Ce paramètre optionnel définit le code de statut HTTP à renvoyer en cas de refus d'accès.
+
+Dans cet exemple, si l'utilisateur n'a pas le rôle ROLE_ADMIN, Symfony renverra une erreur 404 Not Found. Cela signifie que l'accès à la page est refusé et le serveur répondra avec un message indiquant que la page n'a pas été trouvée.
+
+Vous pouvez choisir d'autres codes HTTP, comme :
+
+403 pour un "Forbidden" (accès interdit)
+401 pour un "Unauthorized" (non autorisé)
+500 pour une erreur interne du serveur.
+4. message="Page not found"
+Ce paramètre définit un message personnalisé qui sera affiché lorsque l'accès est refusé.
+
+Le message est retourné en réponse HTTP lorsque l'accès est restreint. Dans ce cas, le message "Page not found" sera affiché à l'utilisateur, indiquant qu'il n'est pas autorisé à accéder à cette page.
+
+Vous pouvez personnaliser ce message selon vos besoins pour fournir des informations plus claires aux utilisateurs, comme "Accès interdit" ou "Vous n'avez pas les permissions nécessaires".
+
+---> N'OUBLIER PAS DE TELECHARGER LE PAQUET :  composer require sensio/framework-extra-bundle
+ET D'IMPORTER LE USE DANS LE controlleur: use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+========================================================================
+PERSONNALISER LA PAGE D'EUUER
 
 
 
