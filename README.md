@@ -3872,8 +3872,21 @@ Vous pouvez personnaliser ce message selon vos besoins pour fournir des informat
 ET D'IMPORTER LE USE DANS LE controlleur: use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 ========================================================================
 PERSONNALISER LA PAGE D'EUUER
+il faut créer un fichier error404.html.twig dans le dossier template/bunles/TwigBundle
+et copier le code qui se trouve dans la page internet de symfonyLE CODE :
+{# templates/bundles/TwigBundle/Exception/error404.html.twig #}
+{% extends 'base.html.twig' %}
 
+{% block body %}
+    <h1 class="my-5">Page not found</h1>
 
+    <p>
+        The requested page couldn't be located. Checkout for any URL
+        misspelling or <a href="{{ path('home') }}">return to the homepage</a>.
+    </p>
+{% endblock %}
+ ET POUR L'AFFICHER IL FAUT CHANGER APP_ENV=dev EN APP_ENV=prod
+ 
 
 
 
