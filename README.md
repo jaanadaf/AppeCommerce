@@ -3885,7 +3885,64 @@ et copier le code qui se trouve dans la page internet de symfonyLE CODE :
         misspelling or <a href="{{ path('home') }}">return to the homepage</a>.
     </p>
 {% endblock %}
- ET POUR L'AFFICHER IL FAUT CHANGER APP_ENV=dev EN APP_ENV=prod
+ ET POUR L'AFFICHER IL FAUT CHANGER APP_ENV=dev --EN--> APP_ENV=prod
+ =======================================================================
+ AFFICHER LE MESSAGE DU SUCCES LORSQU'UN UTILISATEUR CREE UN COMPTE OU SE CONNECTE
+
+----->Afficher un message lors de la création d'un compte : Utilisez $this->addFlash('success', 'Votre compte a été créé avec succès !') dans le contrôleur d'enregistrement.
+Afficher un message après la création d'un compte (enregistrement)
+Lorsqu'un utilisateur crée un compte, vous pouvez utiliser un flash message pour afficher un message de succès.
+
+Modifications dans le RegistrationController
+Si vous avez un contrôleur pour l'inscription des utilisateurs (par exemple, RegistrationController), vous pouvez ajouter un flash message après la création de l'utilisateur.
+
+Voici un exemple de ce que pourrait être votre méthode dans RegistrationController :
+// Add a flash message for success
+$this->addFlash('success', 'Votre compte a été créé avec succès !');
+$this->addFlash('success', 'Votre compte a été créé avec succès !') : Cela ajoute un message flash qui sera affiché sur la page suivante.
+
+---->. Afficher un message après la connexion de l'utilisateur
+Vous pouvez également afficher un message lorsque l'utilisateur se connecte avec succès. Pour cela, vous pouvez modifier le SecurityController pour afficher un message flash après la connexion réussie.
+
+Modifications dans le SecurityController
+-->$this->addFlash('success', 'Bienvenue, vous êtes connecté !') : Ce message flash sera affiché après que l'utilisateur se soit connecté avec succès.
+
+--->Afficher les messages dans les templates
+Maintenant que vous avez ajouté les messages flash dans vos contrôleurs, vous devez afficher ces messages dans vos templates. Modifiez le fichier base.html.twig ou un autre template de base pour afficher les messages flash.
+
+Ajoutez ceci dans votre template, par exemple juste après l'ouverture du <body> :
+
+twig
+Copier le code
+<!-- templates/base.html.twig -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mon Application{% endblock %}</title>
+    <link rel="stylesheet" href="...">
+</head>
+<body>
+    {% for label, messages in app.flashes %}
+        <div class="alert alert-{{ label }}">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    {% block body %}{% endblock %}
+</body>
+</html>
+Dans cet exemple :
+
+app.flashes : Cela récupère tous les messages flash dans Symfony.
+Vous pouvez afficher les messages avec des classes CSS différentes selon le type (success, error, etc.).
+--->4. Configuration dans security.yaml
+Enfin, assurez-vous que votre security.yaml est bien configuré pour gérer les authentifications et que vos contrôleurs de sécurité et d'enregistrement sont correctement protégés.
+
  
 
 

@@ -6,7 +6,7 @@
     <div class="row my-5">
         <div class="col-md-6 mx-auto">
             <div class="card">
-                <div class="card-header">Log in</div>
+                <div class="card-header">Se connecter</div>
                 <div class="card-body">
                     <form method="post">
                         {% if error %}
@@ -19,7 +19,7 @@
                             </div>
                         {% else %}
 
-                        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+                        <h1 class="h3 mb-3 font-weight-normal">Veuillez saisir vos informations</h1>
                         <label for="inputUsername">Username</label>
                         <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control my-2" autocomplete="username" required autofocus>
                         <label for="inputPassword">Password</label>
@@ -41,7 +41,7 @@
                         #}
 
                         <button class="btn btn-lg btn-primary my-2" type="submit">
-                            Sign in
+                            Connectez-vous
                         </button>
                         {% endif %}
                     </form>

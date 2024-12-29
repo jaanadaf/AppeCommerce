@@ -19,7 +19,7 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
-    public const LOGIN_ROUTE = 'app_login';
+    public const LOGIN_ROUTE = 'app_login'; // Vous pouvez adapter la route de connexion si nécessaire
 
     private UrlGeneratorInterface $urlGenerator;
 
@@ -45,17 +45,15 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        // Ajouter un message flash pour indiquer que l'utilisateur est connecté
-        $this->addFlash('success', 'You have successfully logged in!');
-
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
 
-        // Rediriger vers la page d'accueil
+        // Rediriger vers la page d'accueil après la connexion
         return new RedirectResponse($this->urlGenerator->generate('home'));
     }
 
+    // Implémentation de la méthode getLoginUrl requise
     protected function getLoginUrl(Request $request): string
     {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
